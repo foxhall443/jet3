@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,25 +9,28 @@
     :root{--bg:#0b0b0b;--card:#121212;--muted:#9aa0a6;--gold:#d4af37;--line:#2a2a2a;}
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
-    .wrap{max-width:1100px;margin:0 auto;padding:32px 18px 64px}
-    header{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+    .wrap{max-width:1400px;margin:0 auto;padding:28px 18px 64px}
+    header{display:flex;gap:10px;align-items:center;margin-bottom:14px}
     .dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.6)}
-    h1{margin:0;font-size:26px;font-weight:800}
+    h1{margin:0;font-size:24px;font-weight:800}
     .sub{color:var(--muted)}
-    .panel{background:linear-gradient(180deg,#151515,#0f0f0f);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .panel{background:linear-gradient(180deg,#151515,#0f0f0f);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
-    input[type="number"]{width:100%;background:#101010;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px}
+    label{font-size:12px;color:#9aa0a6;display:block;margin-bottom:6px}
+    input[type="text"]{width:100%;background:#101010;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px}
     button{appearance:none;border:1px solid var(--gold);background:var(--gold);color:#000;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
     .grid{display:grid;gap:12px}
     .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    @media (max-width:900px){.grid-3{grid-template-columns:1fr}}
+    @media (max-width:1200px){.grid-3{grid-template-columns:1fr}}
     .muted{color:var(--muted)}
     .scroll{overflow:auto;border:1px solid var(--line);border-radius:12px}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    thead th{position:sticky;top:0;background:#141414}
-    th,td{border:1px solid var(--line);padding:8px 9px;text-align:right;white-space:nowrap}
-    th:first-child,td:first-child{text-align:center}
+    table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+    th,td{border:1px solid var(--line);padding:6px 7px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    td.wrap{white-space:normal;word-wrap:break-word;overflow-wrap:break-word}
+    .kpis{display:grid;grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px}
+    .kpi{background:#0f0f0f;border:1px solid var(--line);border-radius:12px;padding:12px}
+    .kpi .label{color:#9aa0a6;font-size:12px}
+    .kpi .value{font-size:22px;font-weight:800;margin-top:4px}
   </style>
 </head>
 <body>
@@ -37,37 +39,55 @@
       <div class="dot"></div>
       <div>
         <h1>Jet Finance Calculator</h1>
-        <div class="sub">Edit <b>G2–G4</b> below. View-only output shows <b>A1:N34</b> from “Cheat Code”. All formulas run in your browser.</div>
+        <div class="sub">Edit the 3 inputs below. “Cheat Code!B7:M34” is shown (A & N hidden; rows 1–6 hidden). IRR from U7:U27 is written to J29.</div>
       </div>
     </header>
 
-    <!-- Inputs: ONLY G2, G3, G4 -->
+    <!-- Inputs G2:G4 -->
     <section class="panel">
       <div class="grid grid-3">
         <div>
           <label for="G2">Approximate Taxable Income (G2)</label>
-          <input id="G2" type="number" step="any" placeholder="Enter value for G2" />
+          <input id="G2" type="text" placeholder="e.g. 5,000,000" />
         </div>
         <div>
           <label for="G3">Expected Annual Income Growth (G3)</label>
-          <input id="G3" type="number" step="any" placeholder="Enter value for G3" />
+          <input id="G3" type="text" placeholder="e.g. 8% or 0.08" />
         </div>
         <div>
-          <label for="G4">Approx. Investments Outside Retirement Not Collateralized (G4)</label>
-          <input id="G4" type="number" step="any" placeholder="Enter value for G4" />
+          <label for="G4">Investments Outside Retirement Not Collateralized (G4)</label>
+          <input id="G4" type="text" placeholder="e.g. 20,000,000" />
         </div>
       </div>
       <div class="row" style="margin-top:12px">
-        <button id="applyBtn">Apply G2–G4 to Model</button>
-        <span class="muted">Only these three cells are editable. Everything else updates automatically.</span>
+        <button id="applyBtn">Apply & Recalculate</button>
+        <span class="muted">Auto-applies when you stop typing for 600ms.</span>
       </div>
     </section>
 
-    <!-- Output: ONLY A1:N34 (Cheat Code) -->
-    <section class="panel" style="margin-top:16px">
+    <!-- KPIs -->
+    <section class="panel">
+      <div class="kpis">
+        <div class="kpi">
+          <div class="label">IRR (written to J29)</div>
+          <div id="kpiIrr" class="value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">J29 (displayed)</div>
+          <div id="kpiJ29" class="value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Expected Annual Income Growth (G3)</div>
+          <div id="kpiG3" class="value">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table: B7:M34 -->
+    <section class="panel">
       <div class="row" style="justify-content:space-between;align-items:baseline">
-        <h3 style="margin:0">Output (Cheat Code!A1:N34)</h3>
-        <span class="muted">Live results from your spreadsheet’s formulas</span>
+        <h3 style="margin:0">Output (Cheat Code!B7:M34)</h3>
+        <span class="muted">Wide layout, wrapped headings (row 7), currency shown with $ and no decimals.</span>
       </div>
       <div id="rangeBox" class="scroll" style="margin-top:10px"></div>
     </section>
@@ -75,49 +95,86 @@
 
   <script src="https://cdn.jsdelivr.net/npm/hyperformula/dist/hyperformula.full.min.js"></script>
   <script>
-    // Embedded workbook from your XLSX:
-    const SHEETS = {"Cheat Code": [[null, null, null, null, null, null, "Cheat Code Inputs", null, null, null, null, null, null, null, null, null, null, null, null, null, "Assumed Short Term Int Rates", null, null, null, 0.055, "Assumed Net RoR New Portfolio", null, null, 0.08, "Insurance Multiplier", 20, null, null, null, null], [null, null, "Approximate Taxable Income", null, null, null, 10000000, null, null, null, null, null, null, null, null, null, null, null, null, null, "Accelerate Depreciation Tax Savings", null, null, null, "=G5*0.4", "Depreciation Percentage Allowable", null, null, 1, null, null, null, null, null, null], [null, null, "Expected Annual Income Growth", null, null, null, 0.05, null, null, null, null, null, null, null, null, null, null, null, null, null, "Redeploy Current Inv %", null, null, null, 0.2, "Assumed Income Tax Rate", null, null, 0.4, null, null, null, null, null, null], [null, null, "Approximate Investments Outside Retirement Not Collateralized", null, null, null, 25000000, null, null, null, null, null, null, null, null, null, null, null, null, null, "Plane Purchase Price as % of Investments", null, null, null, 0.5, "Max 1st Year Ordinary Loss $", null, null, 600000, null, null, null, null, null, null], [null, null, "Plane Purchase Amount Example", null, null, null, "=G4*Y4", null, null, null, null, null, null, null, null, null, null, null, null, null, "Plane Value Loss Per Year", null, null, null, 0.05, "Max Ordinary Loss %", null, null, 0.8, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "Assumed Net RoR Existing Portfolio", null, null, null, 0.08, "Assumed Ordinary Losses % of Assets", null, null, 0.25, null, null, null, null, null, null], [null, "Yr", "Loan Balance", "Interest Only Payment", "Plane Value", "Existing Investment Portfolio Collateralized to Finance Purchase EoY", "Tax Savings Redeployed to Grow While Generating Tax Losses EoY", "Ordinary Income Investment Losses", "Annual Income Tax Savings From Accelerated Depreciation, Interest and Active Trader Losses", "Positive/(Negative) Cash Flow on Plane Acquisition", "Cumulative Positive/(Negative) Cash Flow on Plane Financing", "Net Cash & Cash Value", "Net Legacy Value", null, null, null, null, null, null, null, "=-V7", "=G4", "Depreciation Used", "Gross Taxable Income", "Baseline Estimated Income Taxes @ 40%", "Taxable Income After Interest Deduction", "Max Ordinary Losses From Investments Capped by Income", "Net Taxable Income After Depreciation", "Net Taxable Income After Investment Losses", "Net Income Taxes", "Income Taxes Saved", "Net Free Cash Flow After Debt Service Reinvested", "Surplus Free Cash Flow", "Credit Line LTV", "Investments Without Plane Purchase As Is"], [null, 1, "=-G5", "=Y$1*C8", "=G5", "=G4*(1-Y$3)*(1)", "=G4*Y3*(1)", "=IF(G8*AC$6>-AA8,AA8,-G8*AC$6)", "=-(D8+H8)*AC$3+W8*AC$3", "=I8+D8", "=J8", "='Premium Finance'!K5", "='Premium Finance'!L5+C8+E8+F8+G8", null, null, null, null, null, null, null, 0, "=G8+F8+E8+C8+L8", "=IF(G5*AC$2>Z8,Z8,G5)", "=G2", "=-X8*AC$3", "=X8+D8", "=IF(AB8<AC4, -AB8*AC5,-AC4)", "=Z8-W8", "=AB8+H8", "=-AC8*AC$3", "=AD8-Y8", "=AE8+D8", 0, "=-C8/F8", "=G4*(1)"], [null, 2, "=C8", "=Y$1*C9", "=E8*(1-Y$5)", "=F8*(1+Y$6)", "=G8*(1+AC$1)+AF8-AG8", "=IF(G9*AC$6>-AA9,AA9,-G9*AC$6)", "=-(D9+H9)*AC$3+W9*AC$3", "=I9+D9", "=K8+J9", "='Premium Finance'!K6", "='Premium Finance'!L6+C9+E9+F9+G9", null, null, null, null, null, null, null, 0, "=G9+F9+E9+C9+L9", "=IF(G$5*AC$2-SUM(W$8:W8)>Z9,Z9,G$5-SUM(W$8:W8))", "=X8*(1+G$3)", "=-X9*AC$3", "=X9+D9", "=-AB9*AC$5", "=Z9-W9", "=AB9+H9", "=-AC9*AC$3", "=AD9-Y9", "=AE9+D9", "=IF(AA9=H9,AF9,0)", "=-C9/F9", "=AI8*(1+Y$6)"], [null, 3, "=C9", "=Y$1*C10", "=E9*(1-Y$5)", "=F9*(1+Y$6)", "=G9*(1+AC$1)+AF9-AG9", "=IF(G10*AC$6>-AA10,AA10,-G10*AC$6)", "=-(D10+H10)*AC$3+W10*AC$3", "=I10+D10", "=K9+J10", "='Premium Finance'!K7", "='Premium Finance'!L7+C10+E10+F10+G10", null, null, null, null, null, null, null, 0, "=G10+F10+E10+C10+L10", "=IF(G$5*AC$2-SUM(W$8:W9)>Z10,Z10,G$5-SUM(W$8:W9))", "=X9*(1+G$3)", "=-X10*AC$3", "=X10+D10", "=-AB10*AC$5", "=Z10-W10", "=AB10+H10", "=-AC10*AC$3", "=AD10-Y10", "=AE10+D10", "=IF(AA10=H10,AF10,0)", "=-C10/F10", "=AI9*(1+Y$6)"], [null, 4, "=C10", "=Y$1*C11", "=E10*(1-Y$5)", "=F10*(1+Y$6)", "=G10*(1+AC$1)+AF10-AG10", "=IF(G11*AC$6>-AA11,AA11,-G11*AC$6)", "=-(D11+H11)*AC$3+W11*AC$3", "=I11+D11", "=K10+J11", "='Premium Finance'!K8", "='Premium Finance'!L8+C11+E11+F11+G11", null, null, null, null, null, null, null, 0, "=G11+F11+E11+C11+L11", "=IF(G$5*AC$2-SUM(W$8:W10)>Z11,Z11,G$5-SUM(W$8:W10))", "=X10*(1+G$3)", "=-X11*AC$3", "=X11+D11", "=-AB11*AC$5", "=Z11-W11", "=AB11+H11", "=-AC11*AC$3", "=AD11-Y11", "=AE11+D11", "=IF(AA11=H11,AF11,0)", "=-C11/F11", "=AI10*(1+Y$6)"], [null, 5, "=C11", "=Y$1*C12", "=E11*(1-Y$5)", "=F11*(1+Y$6)", "=G11*(1+AC$1)+AF11-AG11", "=IF(G12*AC$6>-AA12,AA12,-G12*AC$6)", "=-(D12+H12)*AC$3+W12*AC$3", "=I12+D12", "=K11+J12", "='Premium Finance'!K9", "='Premium Finance'!L9+C12+E12+F12+G12", null, null, null, null, null, null, null, 0, "=G12+F12+E12+C12+L12", "=IF(G$5*AC$2-SUM(W$8:W11)>Z12,Z12,G$5-SUM(W$8:W11))", "=X11*(1+G$3)", "=-X12*AC$3", "=X12+D12", "=-AB12*AC$5", "=Z12-W12", "=AB12+H12", "=-AC12*AC$3", "=AD12-Y12", "=AE12+D12", "=IF(AA12=H12,AF12,0)", "=-C12/F12", "=AI11*(1+Y$6)"], [null, 6, "=C12", "=Y$1*C13", "=E12*(1-Y$5)", "=F12*(1+Y$6)", "=G12*(1+AC$1)+AF12-AG12", "=IF(G13*AC$6>-AA13,AA13,-G13*AC$6)", "=-(D13+H13)*AC$3+W13*AC$3", "=I13+D13", "=K12+J13", "='Premium Finance'!K10", "='Premium Finance'!L10+C13+E13+F13+G13", null, null, null, null, null, null, null, 0, "=G13+F13+E13+C13+L13", "=IF(G$5*AC$2-SUM(W$8:W12)>Z13,Z13,G$5-SUM(W$8:W12))", "=X12*(1+G$3)", "=-X13*AC$3", "=X13+D13", "=-AB13*AC$5", "=Z13-W13", "=AB13+H13", "=-AC13*AC$3", "=AD13-Y13", "=AE13+D13", "=IF(AA13=H13,AF13,0)", "=-C13/F13", "=AI12*(1+Y$6)"], [null, 7, "=C13", "=Y$1*C14", "=E13*(1-Y$5)", "=F13*(1+Y$6)", "=G13*(1+AC$1)+AF13-AG13", "=IF(G14*AC$6>-AA14,AA14,-G14*AC$6)", "=-(D14+H14)*AC$3+W14*AC$3", "=I14+D14", "=K13+J14", "='Premium Finance'!K11", "='Premium Finance'!L11+C14+E14+F14+G14", null, null, null, null, null, null, null, 0, "=G14+F14+E14+C14+L14", "=IF(G$5*AC$2-SUM(W$8:W13)>Z14,Z14,G$5-SUM(W$8:W13))", "=X13*(1+G$3)", "=-X14*AC$3", "=X14+D14", "=-AB14*AC$5", "=Z14-W14", "=AB14+H14", "=-AC14*AC$3", "=AD14-Y14", "=AE14+D14", "=IF(AA14=H14,AF14,0)", "=-C14/F14", "=AI13*(1+Y$6)"], [null, 8, "=C14", "=Y$1*C15", "=E14*(1-Y$5)", "=F14*(1+Y$6)", "=G14*(1+AC$1)+AF14-AG14", "=IF(G15*AC$6>-AA15,AA15,-G15*AC$6)", "=-(D15+H15)*AC$3+W15*AC$3", "=I15+D15", "=K14+J15", "='Premium Finance'!K12", "='Premium Finance'!L12+C15+E15+F15+G15", null, null, null, null, null, null, null, 0, "=G15+F15+E15+C15+L15", "=IF(G$5*AC$2-SUM(W$8:W14)>Z15,Z15,G$5-SUM(W$8:W14))", "=X14*(1+G$3)", "=-X15*AC$3", "=X15+D15", "=-AB15*AC$5", "=Z15-W15", "=AB15+H15", "=-AC15*AC$3", "=AD15-Y15", "=AE15+D15", "=IF(AA15=H15,AF15,0)", "=-C15/F15", "=AI14*(1+Y$6)"], [null, 9, "=C15", "=Y$1*C16", "=E15*(1-Y$5)", "=F15*(1+Y$6)", "=G15*(1+AC$1)+AF15-AG15", "=IF(G16*AC$6>-AA16,AA16,-G16*AC$6)", "=-(D16+H16)*AC$3+W16*AC$3", "=I16+D16", "=K15+J16", "='Premium Finance'!K13", "='Premium Finance'!L13+C16+E16+F16+G16", null, null, null, null, null, null, null, 0, "=G16+F16+E16+C16+L16", "=IF(G$5*AC$2-SUM(W$8:W15)>Z16,Z16,G$5-SUM(W$8:W15))", "=X15*(1+G$3)", "=-X16*AC$3", "=X16+D16", "=-AB16*AC$5", "=Z16-W16", "=AB16+H16", "=-AC16*AC$3", "=AD16-Y16", "=AE16+D16", "=IF(AA16=H16,AF16,0)", "=-C16/F16", "=AI15*(1+Y$6)"], [null, 10, "=C16", "=Y$1*C17", "=E16*(1-Y$5)", "=F16*(1+Y$6)", "=G16*(1+AC$1)+AF16-AG16", "=IF(G17*AC$6>-AA17,AA17,-G17*AC$6)", "=-(D17+H17)*AC$3+W17*AC$3", "=I17+D17", "=K16+J17", "='Premium Finance'!K14", "='Premium Finance'!L14+C17+E17+F17+G17", null, null, null, null, null, null, null, 0, "=G17+F17+E17+C17+L17", "=IF(G$5*AC$2-SUM(W$8:W16)>Z17,Z17,G$5-SUM(W$8:W16))", "=X16*(1+G$3)", "=-X17*AC$3", "=X17+D17", "=-AB17*AC$5", "=Z17-W17", "=AB17+H17", "=-AC17*AC$3", "=AD17-Y17", "=AE17+D17", "=IF(AA17=H17,AF17,0)", "=-C17/F17", "=AI16*(1+Y$6)"], [null, 11, "=C17", "=Y$1*C18", "=E17*(1-Y$5)", "=F17*(1+Y$6)", "=G17*(1+AC$1)+AF17-AG17", "=IF(G18*AC$6>-AA18,AA18,-G18*AC$6)", "=-(D18+H18)*AC$3+W18*AC$3", "=I18+D18", "=K17+J18", "='Premium Finance'!K15", "='Premium Finance'!L15+C18+E18+F18+G18", null, null, null, null, null, null, null, 0, "=G18+F18+E18+C18+L18", "=IF(G$5*AC$2-SUM(W$8:W17)>Z18,Z18,G$5-SUM(W$8:W17))", "=X17*(1+G$3)", "=-X18*AC$3", "=X18+D18", "=-AB18*AC$5", "=Z18-W18", "=AB18+H18", "=-AC18*AC$3", "=AD18-Y18", "=AE18+D18", "=IF(AA18=H18,AF18,0)", "=-C18/F18", "=AI17*(1+Y$6)"], [null, 12, "=C18", "=Y$1*C19", "=E18*(1-Y$5)", "=F18*(1+Y$6)", "=G18*(1+AC$1)+AF18-AG18", "=IF(G19*AC$6>-AA19,AA19,-G19*AC$6)", "=-(D19+H19)*AC$3+W19*AC$3", "=I19+D19", "=K18+J19", "='Premium Finance'!K16", "='Premium Finance'!L16+C19+E19+F19+G19", null, null, null, null, null, null, null, 0, "=G19+F19+E19+C19+L19", "=IF(G$5*AC$2-SUM(W$8:W18)>Z19,Z19,G$5-SUM(W$8:W18))", "=X18*(1+G$3)", "=-X19*AC$3", "=X19+D19", "=-AB19*AC$5", "=Z19-W19", "=AB19+H19", "=-AC19*AC$3", "=AD19-Y19", "=AE19+D19", "=IF(AA19=H19,AF19,0)", "=-C19/F19", "=AI18*(1+Y$6)"], [null, 13, "=C19", "=Y$1*C20", "=E19*(1-Y$5)", "=F19*(1+Y$6)", "=G19*(1+AC$1)+AF19-AG19", "=IF(G20*AC$6>-AA20,AA20,-G20*AC$6)", "=-(D20+H20)*AC$3+W20*AC$3", "=I20+D20", "=K19+J20", "='Premium Finance'!K17", "='Premium Finance'!L17+C20+E20+F20+G20", null, null, null, null, null, null, null, 0, "=G20+F20+E20+C20+L20", "=IF(G$5*AC$2-SUM(W$8:W19)>Z20,Z20,G$5-SUM(W$8:W19))", "=X19*(1+G$3)", "=-X20*AC$3", "=X20+D20", "=-AB20*AC$5", "=Z20-W20", "=AB20+H20", "=-AC20*AC$3", "=AD20-Y20", "=AE20+D20", "=IF(AA20=H20,AF20,0)", "=-C20/F20", "=AI19*(1+Y$6)"], [null, 14, "=C20", "=Y$1*C21", "=E20*(1-Y$5)", "=F20*(1+Y$6)", "=G20*(1+AC$1)+AF20-AG20", "=IF(G21*AC$6>-AA21,AA21,-G21*AC$6)", "=-(D21+H21)*AC$3+W21*AC$3", "=I21+D21", "=K20+J21", "='Premium Finance'!K18", "='Premium Finance'!L18+C21+E21+F21+G21", null, null, null, null, null, null, null, 0, "=G21+F21+E21+C21+L21", "=IF(G$5*AC$2-SUM(W$8:W20)>Z21,Z21,G$5-SUM(W$8:W20))", "=X20*(1+G$3)", "=-X21*AC$3", "=X21+D21", "=-AB21*AC$5", "=Z21-W21", "=AB21+H21", "=-AC21*AC$3", "=AD21-Y21", "=AE21+D21", "=IF(AA21=H21,AF21,0)", "=-C21/F21", "=AI20*(1+Y$6)"], [null, 15, "=C21", "=Y$1*C22", "=E21*(1-Y$5)", "=F21*(1+Y$6)", "=G21*(1+AC$1)+AF21-AG21", "=IF(G22*AC$6>-AA22,AA22,-G22*AC$6)", "=-(D22+H22)*AC$3+W22*AC$3", "=I22+D22", "=K21+J22", "='Premium Finance'!K19", "='Premium Finance'!L19+C22+E22+F22+G22", null, null, null, null, null, null, null, 0, "=G22+F22+E22+C22+L22", "=IF(G$5*AC$2-SUM(W$8:W21)>Z22,Z22,G$5-SUM(W$8:W21))", "=X21*(1+G$3)", "=-X22*AC$3", "=X22+D22", "=-AB22*AC$5", "=Z22-W22", "=AB22+H22", "=-AC22*AC$3", "=AD22-Y22", "=AE22+D22", "=IF(AA22=H22,AF22,0)", "=-C22/F22", "=AI21*(1+Y$6)"], [null, 16, "=C22", "=Y$1*C23", "=E22*(1-Y$5)", "=F22*(1+Y$6)", "=G22*(1+AC$1)+AF22-AG22", "=IF(G23*AC$6>-AA23,AA23,-G23*AC$6)", "=-(D23+H23)*AC$3+W23*AC$3", "=I23+D23", "=K22+J23", "='Premium Finance'!K20", "='Premium Finance'!L20+C23+E23+F23+G23", null, null, null, null, null, null, null, 0, "=G23+F23+E23+C23+L23", "=IF(G$5*AC$2-SUM(W$8:W22)>Z23,Z23,G$5-SUM(W$8:W22))", "=X22*(1+G$3)", "=-X23*AC$3", "=X23+D23", "=-AB23*AC$5", "=Z23-W23", "=AB23+H23", "=-AC23*AC$3", "=AD23-Y23", "=AE23+D23", "=IF(AA23=H23,AF23,0)", "=-C23/F23", "=AI22*(1+Y$6)"], [null, 17, "=C23", "=Y$1*C24", "=E23*(1-Y$5)", "=F23*(1+Y$6)", "=G23*(1+AC$1)+AF23-AG23", "=IF(G24*AC$6>-AA24,AA24,-G24*AC$6)", "=-(D24+H24)*AC$3+W24*AC$3", "=I24+D24", "=K23+J24", "='Premium Finance'!K21", "='Premium Finance'!L21+C24+E24+F24+G24", null, null, null, null, null, null, null, 0, "=G24+F24+E24+C24+L24", "=IF(G$5*AC$2-SUM(W$8:W23)>Z24,Z24,G$5-SUM(W$8:W23))", "=X23*(1+G$3)", "=-X24*AC$3", "=X24+D24", "=-AB24*AC$5", "=Z24-W24", "=AB24+H24", "=-AC24*AC$3", "=AD24-Y24", "=AE24+D24", "=IF(AA24=H24,AF24,0)", "=-C24/F24", "=AI23*(1+Y$6)"], [null, 18, "=C24", "=Y$1*C25", "=E24*(1-Y$5)", "=F24*(1+Y$6)", "=G24*(1+AC$1)+AF24-AG24", "=IF(G25*AC$6>-AA25,AA25,-G25*AC$6)", "=-(D25+H25)*AC$3+W25*AC$3", "=I25+D25", "=K24+J25", "='Premium Finance'!K22", "='Premium Finance'!L22+C25+E25+F25+G25", null, null, null, null, null, null, null, 0, "=G25+F25+E25+C25+L25", "=IF(G$5*AC$2-SUM(W$8:W24)>Z25,Z25,G$5-SUM(W$8:W24))", "=X24*(1+G$3)", "=-X25*AC$3", "=X25+D25", "=-AB25*AC$5", "=Z25-W25", "=AB25+H25", "=-AC25*AC$3", "=AD25-Y25", "=AE25+D25", "=IF(AA25=H25,AF25,0)", "=-C25/F25", "=AI24*(1+Y$6)"], [null, 19, "=C25", "=Y$1*C26", "=E25*(1-Y$5)", "=F25*(1+Y$6)", "=G25*(1+AC$1)+AF25-AG25", "=IF(G26*AC$6>-AA26,AA26,-G26*AC$6)", "=-(D26+H26)*AC$3+W26*AC$3", "=I26+D26", "=K25+J26", "='Premium Finance'!K23", "='Premium Finance'!L23+C26+E26+F26+G26", null, null, null, null, null, null, null, 0, "=G26+F26+E26+C26+L26", "=IF(G$5*AC$2-SUM(W$8:W25)>Z26,Z26,G$5-SUM(W$8:W25))", "=X25*(1+G$3)", "=-X26*AC$3", "=X26+D26", "=-AB26*AC$5", "=Z26-W26", "=AB26+H26", "=-AC26*AC$3", "=AD26-Y26", "=AE26+D26", "=IF(AA26=H26,AF26,0)", "=-C26/F26", "=AI25*(1+Y$6)"], [null, 20, "=C26", "=Y$1*C27", "=E26*(1-Y$5)", "=F26*(1+Y$6)", "=G26*(1+AC$1)+AF26-AG26", "=IF(G27*AC$6>-AA27,AA27,-G27*AC$6)", "=-(D27+H27)*AC$3+W27*AC$3", "=I27+D27", "=K26+J27", "='Premium Finance'!K24", "='Premium Finance'!L24+C27+E27+F27+G27", null, null, null, null, null, null, null, "=V27", "=G27+F27+E27+C27+L27", "=IF(G$5*AC$2-SUM(W$8:W26)>Z27,Z27,G$5-SUM(W$8:W26))", "=X26*(1+G$3)", "=-X27*AC$3", "=X27+D27", "=-AB27*AC$5", "=Z27-W27", "=AB27+H27", "=AC27*AC$3", "=AD27-Y27", "=AE27+D27", "=IF(AA27=H27,AF27,0)", "=-C27/F27", "=AI26*(1+Y$6)"], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, "=IRR(U7:U27)", "Effective Compound RoR", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, "=V27", "Combined Net Asset Value with Buying a Plane", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, "=U27-AI27", "Net Asset Value Increase Compared to Not Buying a Plane", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, "=M27-AI27", "Net Legacy Increase Compared to Not Buying a Plane", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, "=-J31", "Cumulative Cost of Your Jet", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]], "Premium Finance": [[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, "='Cheat Code'!AE1"], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], [null, null, null, null, null, null, null, "=J3", null, "='Cheat Code'!Y1", null, null, null, null, null, null, null, null, null, null, null, null], ["Year ", "Premium", "Cash Surrender Value", "Death Benefit", null, "Annual Loan", "Cumulative Loan", "Interest", "Surplus Free Cash Flow", "Surplus Side Acct", "Net Cash & Cash Value", "Net Death Benefit & Cash", null, null, null, null, null, null, null, null, null, null], ["=O5", "=R5*$V$1", "=U5*$V$1", "=V5*$V$1", null, "=B5", "=F5", "=G5*H$3", "='Cheat Code'!AG8", "=IF(G6=0,I5-H5-G5*(1+J$3),0)", "=C5-G5+J5", "=D5-G5+J5", null, null, 1, 46, 71400, 71400, 3140, 3140, 26410, 1006222], ["=O6", "=R6*$V$1", "=U6*$V$1", "=V6*$V$1", null, "=B6", "=IF(G5+H5+F6-I6<0,0,G5+H5+F6-I6)", "=G6*H$3", "='Cheat Code'!AG9", "=IF(G7=0,I6-H6-G6+J5*(1+J$3),0)", "=C6-G6+J6", "=D6-G6+J6", null, null, 2, 47, 71400, 71400, 6005, 9200, 73200, 1017916], ["=O7", "=R7*$V$1", "=U7*$V$1", "=V7*$V$1", null, "=B7", "=IF(G6+H6+F7-I7<0,0,G6+H6+F7-I7)", "=G7*H$3", "='Cheat Code'!AG10", "=IF(G8=0,I7-H7-G7+J6*(1+J$3),0)", "=C7-G7+J7", "=D7-G7+J7", null, null, 3, 48, 71400, 71400, 9055, 18416, 143306, 1035248], ["=O8", "=R8*$V$1", "=U8*$V$1", "=V8*$V$1", null, "=B8", "=IF(G7+H7+F8-I8<0,0,G7+H7+F8-I8)", "=G8*H$3", "='Cheat Code'!AG11", "=IF(G9=0,I8-H8-G8+J7*(1+J$3),0)", "=C8-G8+J8", "=D8-G8+J8", null, null, 4, 49, 71400, 71400, 12289, 31027, 218127, 1058365], ["=O9", "=R9*$V$1", "=U9*$V$1", "=V9*$V$1", null, "=B9", "=IF(G8+H8+F9-I9<0,0,G8+H8+F9-I9)", "=G9*H$3", "='Cheat Code'!AG12", "=IF(G10=0,I9-H9-G9+J8*(1+J$3),0)", "=C9-G9+J9", "=D9-G9+J9", null, null, 5, 50, 71400, 71400, 15737, 47307, 297987, 1087459], ["=O10", "=R10*$V$1", "=U10*$V$1", "=V10*$V$1", null, "=B10", "=IF(G9+H9+F10-I10<0,0,G9+H9+F10-I10)", "=G10*H$3", "='Cheat Code'!AG13", "=IF(G11=0,I10-H10-G10+J9*(1+J$3),0)", "=C10-G10+J10", "=D10-G10+J10", null, null, 6, 51, 71400, 71400, 18090, 66225, 381845, 1120327], ["=O11", "=R11*$V$1", "=U11*$V$1", "=V11*$V$1", null, "=B11", "=IF(G10+H10+F11-I11<0,0,G10+H10+F11-I11)", "=G11*H$3", "='Cheat Code'!AG14", "=IF(G12=0,I11-H11-G11+J10*(1+J$3),0)", "=C11-G11+J11", "=D11-G11+J11", null, null, 7, 52, 71400, 71400, 20586, 87969, 469919, 1157087], ["=O12", "=R12*$V$1", "=U12*$V$1", "=V12*$V$1", null, "=B12", "=IF(G11+H11+F12-I12<0,0,G11+H11+F12-I12)", "=G12*H$3", "='Cheat Code'!AG15", "=IF(G13=0,I12-H12-G12+J11*(1+J$3),0)", "=C12-G12+J12", "=D12-G12+J12", null, null, 8, 53, 71400, 71400, 23263, 112764, 562464, 1197918], ["=O13", "=R13*$V$1", "=U13*$V$1", "=V13*$V$1", null, "=B13", "=IF(G12+H12+F13-I13<0,0,G12+H12+F13-I13)", "=G13*H$3", "='Cheat Code'!AG16", "=IF(G14=0,I13-H13-G13+J12*(1+J$3),0)", "=C13-G13+J13", "=D13-G13+J13", null, null, 9, 54, 71400, 71400, 26113, 140834, 659754, 1242968], ["=O14", "=R14*$V$1", "=U14*$V$1", "=V14*$V$1", null, "=B14", "=IF(G13+H13+F14-I14<0,0,G13+H13+F14-I14)", "=G14*H$3", "='Cheat Code'!AG17", "=IF(G15=0,I14-H14-G14+J13*(1+J$3),0)", "=C14-G14+J14", "=D14-G14+J14", null, null, 10, 55, 71400, 71400, 29151, 172420, 762080, 1292406], ["=O15", "=R15*$V$1", "=U15*$V$1", "=V15*$V$1", null, null, "=IF(G14+H14+F15-I15<0,0,G14+H14+F15-I15)", "=G15*H$3", "='Cheat Code'!AG18", "=IF(G16=0,I15-H15-G15+J14*(1+J$3),0)", "=C15-G15+J15", "=D15-G15+J15", null, null, 11, 56, 0, 0, 31725, 207107, 806897, 1345299], ["=O16", "=R16*$V$1", "=U16*$V$1", "=V16*$V$1", null, null, "=IF(G15+H15+F16-I16<0,0,G15+H15+F16-I16)", "=G16*H$3", "='Cheat Code'!AG19", "=IF(G17=0,I16-H16-G16+J15*(1+J$3),0)", "=C16-G16+J16", "=D16-G16+J16", null, null, 12, 57, 0, 0, 33554, 244197, 854227, 1400303], ["=O17", "=R17*$V$1", "=U17*$V$1", "=V17*$V$1", null, null, "=IF(G16+H16+F17-I17<0,0,G16+H16+F17-I17)", "=G17*H$3", "='Cheat Code'!AG20", "=IF(G18=0,I17-H17-G17+J16*(1+J$3),0)", "=C17-G17+J17", "=D17-G17+J17", null, null, 13, 58, 0, 0, 35487, 283823, 904193, 1457507], ["=O18", "=R18*$V$1", "=U18*$V$1", "=V18*$V$1", null, null, "=IF(G17+H17+F18-I18<0,0,G17+H17+F18-I18)", "=G18*H$3", "='Cheat Code'!AG21", "=IF(G19=0,I18-H18-G18+J17*(1+J$3),0)", "=C18-G18+J18", "=D18-G18+J18", null, null, 14, 59, 0, 0, 37553, 326148, 956948, 1517039], ["=O19", "=R19*$V$1", "=U19*$V$1", "=V19*$V$1", null, null, "=IF(G18+H18+F19-I19<0,0,G18+H18+F19-I19)", "=G19*H$3", "='Cheat Code'!AG22", "=IF(G20=0,I19-H19-G19+J18*(1+J$3),0)", "=C19-G19+J19", "=D19-G19+J19", null, null, 15, 60, 0, 0, 39758, 371335, 1012635, 1579035], ["=O20", "=R20*$V$1", "=U20*$V$1", "=V20*$V$1", null, null, "=IF(G19+H19+F20-I20<0,0,G19+H19+F20-I20)", "=G20*H$3", "='Cheat Code'!AG23", "=IF(G21=0,I20-H20-G20+J19*(1+J$3),0)", "=C20-G20+J20", "=D20-G20+J20", null, null, 16, 61, 0, 0, 42066, 419516, 1071376, 1643567], ["=O21", "=R21*$V$1", "=U21*$V$1", "=V21*$V$1", null, null, "=IF(G20+H20+F21-I21<0,0,G20+H20+F21-I21)", "=G21*H$3", "='Cheat Code'!AG24", "=IF(G22=0,I21-H21-G21+J20*(1+J$3),0)", "=C21-G21+J21", "=D21-G21+J21", null, null, 17, 62, 0, 0, 44525, 470856, 1133306, 1710780], ["=O22", "=R22*$V$1", "=U22*$V$1", "=V22*$V$1", null, null, "=IF(G21+H21+F22-I22<0,0,G21+H21+F22-I22)", "=G22*H$3", "='Cheat Code'!AG25", "=IF(G23=0,I22-H22-G22+J21*(1+J$3),0)", "=C22-G22+J22", "=D22-G22+J22", null, null, 18, 63, 0, 0, 47203, 525614, 1198694, 1780909], ["=O23", "=R23*$V$1", "=U23*$V$1", "=V23*$V$1", null, null, "=IF(G22+H22+F23-I23<0,0,G22+H22+F23-I23)", "=G23*H$3", "='Cheat Code'!AG26", "=IF(G24=0,I23-H23-G23+J22*(1+J$3),0)", "=C23-G23+J23", "=D23-G23+J23", null, null, 19, 64, 0, 0, 50076, 583999, 1267719, 1854149], ["=O24", "=R24*$V$1", "=U24*$V$1", "=V24*$V$1", null, null, "=IF(G23+H23+F24-I24<0,0,G23+H23+F24-I24)", "=G24*H$3", "='Cheat Code'!AG27", "=IF(G25=0,I24-H24-G24+J23*(1+J$3),0)", "=C24-G24+J24", "=D24-G24+J24", null, null, 20, 65, 0, 0, 53103, 646182, 1340532, 1930628], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 21, 66, 0, 0, 56343, 712436, 1417436, 2010547], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 22, 67, 0, 0, 59603, 782791, 1498431, 2093833], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 23, 68, 0, 0, 63016, 857467, 1583767, 2180596], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 24, 69, 0, 0, 66611, 936675, 1673645, 2270981], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 25, 70, 0, 0, 70409, 1020646, 1768286, 2365157], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 26, 71, 0, 0, 74430, 1109587, 1867857, 2463314], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 27, 72, 0, 0, 78754, 1203794, 1972624, 2565748], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 28, 73, 0, 0, 83325, 1303496, 2082786, 2672671], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 29, 74, 0, 0, 88173, 1408914, 2198514, 2784339], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 30, 75, 0, 0, 93244, 1520252, 2319992, 2900933], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 31, 76, 0, 0, 98554, 1637777, 2447497, 3022646], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 32, 77, 0, 0, 104042, 1761661, 2581191, 3149599], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 33, 78, 0, 0, 109735, 1892161, 2721351, 3281940], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 34, 79, 0, 0, 115616, 2029501, 2868211, 3419789], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 35, 80, 0, 0, 121701, 2173876, 3021956, 3563291], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 36, 81, 0, 0, 128072, 2325479, 3182739, 3712688], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 37, 82, 0, 0, 134662, 2484501, 3350741, 3868144], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 38, 83, 0, 0, 141446, 2651129, 3526149, 4029792], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 39, 84, 0, 0, 148879, 2825670, 3709160, 4198305], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 40, 85, 0, 0, 156594, 3008266, 3899886, 4373933], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 41, 86, 0, 0, 164396, 3198776, 4098136, 4556725], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 42, 87, 0, 0, 172601, 3397306, 4303956, 4747097], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 43, 88, 0, 0, 180936, 3603797, 4517267, 4945173], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 44, 89, 0, 0, 189277, 3818008, 4737798, 5150957], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 45, 90, 0, 0, 197530, 4039738, 4965358, 5364359], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 46, 91, 0, 0, 205820, 4269125, 5200145, 5585428], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 47, 92, 0, 0, 214027, 4506309, 5442379, 5814073], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 48, 93, 0, 0, 222341, 4752095, 5693035, 6050369], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 49, 94, 0, 0, 230829, 5007418, 5953208, 6294429], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 50, 95, 0, 0, 239458, 5274089, 6225019, 6546243], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 51, 96, 0, 0, 248388, 5555089, 6511899, 6805843], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 52, 97, 0, 0, 258074, 5853049, 6816729, 7073644], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 53, 98, 0, 0, 267892, 6172750, 7144960, 7349194], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 54, 99, 0, 0, 277301, 6522368, 7505968, 7631119], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 55, 100, 0, 0, 285728, 6916847, 7916847, 7916847], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 56, 101, 0, 0, 459542, 7376389, 8376389, 8376389], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 57, 102, 0, 0, 486058, 7862447, 8862447, 8862447], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 58, 103, 0, 0, 514103, 8376550, 9376550, 9376550], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 59, 104, 0, 0, 543767, 8920317, 9920317, 9920317], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 60, 105, 0, 0, 575142, 9495459, 10495459, 10495459], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 61, 106, 0, 0, 608328, 10103787, 11103787, 11103787], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 62, 107, 0, 0, 643429, 10747215, 11747215, 11747215], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 63, 108, 0, 0, 680554, 11427770, 12427770, 12427770], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 64, 109, 0, 0, 719822, 12147592, 13147592, 13147592], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 65, 110, 0, 0, 761356, 12908948, 13908948, 13908948], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 66, 111, 0, 0, 805286, 13714234, 14714234, 14714234], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 67, 112, 0, 0, 851751, 14565986, 15565986, 15565986], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 68, 113, 0, 0, 900897, 15466883, 16466883, 16466883], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 69, 114, 0, 0, 952879, 16419762, 17419762, 17419762], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 70, 115, 0, 0, 1007860, 17427622, 18427622, 18427622], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 71, 116, 0, 0, 1066014, 18493636, 19493636, 19493636], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 72, 117, 0, 0, 1127523, 19621159, 20621159, 20621159], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 73, 118, 0, 0, 1192581, 20813740, 21813740, 21813740], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 74, 119, 0, 0, 1261393, 22075133, 23075133, 23075133], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 75, 120, 0, 0, 1334175, 23409308, 24409308, 24409308], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, 76, 121, 0, 0, 1411157, 24820465, 25820465, 25820465]]};
-
+    /* Embedded workbook from your Excel — do not edit */
+    const SHEETS = {"Cheat Code":[["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","Year","Cost of Jet","Premium Finance Loan Balance","Interest","Tax Savings from Deduction","Net of Tax Cost of Jet","Jet Value","Value Change","Value Change Adj","Market Invested Value","Annual Cash Value","Net Cash Value","Legacy Value","Legacy Value Change","Legacy Value Change Adj"],["1","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["2","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["3","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["4","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["5","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["6","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["7","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["8","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["9","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["10","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["11","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["12","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["13","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["14","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["15","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["16","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["17","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["18","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["19","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["20","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["21","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["22","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["23","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["24","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["25","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["26","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["27","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],["28","","","","","","","","","","","","","","",""],["29","","","","","","","","","","","","","","",""],["30","","","","","","","","","","","","","","",""],["31","","","","","","","","","","","","","","",""],["32","","","","","","","","","","","","","","",""],["33","","","","","","","","","","","","","","",""],["34","","","","","","","","","","","","","","",""]],"Premium Finance":[["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]]};
     const ACTIVE_SHEET_NAME = "Cheat Code";
-    const OUTPUT_START = "A1";
-    const OUTPUT_END   = "N34"; // EXACTLY A1:N34
+    const OUTPUT_START = "B7";
+    const OUTPUT_END   = "M34"; // drop column N
+    const IRR_RANGE_START = "U7";
+    const IRR_RANGE_END   = "U27";
+    const J29_CELL = "J29";
 
+    // A1 helpers
+    function a1ToRC(a1){
+      const m = /^([A-Za-z]+)(\d+)$/.exec(a1);
+      if(!m) throw new Error("Bad A1: "+a1);
+      const colLetters = m[1].toUpperCase();
+      const row = parseInt(m[2],10) - 1;
+      let col = 0;
+      for (let i=0;i<colLetters.length;i++){
+        col = col*26 + (colLetters.charCodeAt(i)-64);
+      }
+      col -= 1;
+      return {row, col};
+    }
+    function rangeA1ToRC(start,end){
+      const s = a1ToRC(start), e = a1ToRC(end);
+      return {sRow:s.row, sCol:s.col, eRow:e.row, eCol:e.col};
+    }
+
+    // DOM
     const g2El = document.getElementById('G2');
     const g3El = document.getElementById('G3');
     const g4El = document.getElementById('G4');
+    const kpiIrr = document.getElementById('kpiIrr');
+    const kpiJ29 = document.getElementById('kpiJ29');
+    const kpiG3  = document.getElementById('kpiG3');
     const applyBtn = document.getElementById('applyBtn');
     const box = document.getElementById('rangeBox');
 
+    // HF
     let hf = null;
-
-    function buildTableHTML(matrix){
-      const cols = matrix[0]?.length || 0;
-      let html = '<table><thead><tr>';
-      for (let c=0;c<cols;c++){
-        let n=c+1,s=""; while(n>0){const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26);}
-        html += '<th>'+s+'</th>';
-      }
-      html += '</tr></thead><tbody>';
-      for (let r=0;r<matrix.length;r++){
-        html += '<tr>';
-        for (let c=0;c<cols;c++){
-          const v = matrix[r][c];
-          const out = (v===null || v===undefined) ? "" : (typeof v==='number' ? v.toLocaleString() : v);
-          html += '<td>'+out+'</td>';
-        }
-        html += '</tr>';
-      }
-      html += '</tbody></table>';
-      return html;
+    function buildHF(){
+      hf = HyperFormula.HyperFormula.buildFromSheets(SHEETS, { licenseKey:'gpl-v3', useArrayArithmetic:true });
     }
 
-    function getRangeValues(sheetId, a1start, a1end) {
-      const start = HyperFormula.simpleCellAddressFromString(a1start, sheetId);
-      const end   = HyperFormula.simpleCellAddressFromString(a1end, sheetId);
+    // Formatting
+    const fmtMoney = (x) => (x==null || isNaN(Number(x))) ? "" : ("$" + Math.round(Number(x)).toLocaleString());
+    const fmtPct1  = (x) => (x==null || isNaN(Number(x))) ? "" : ((Number(x)*100).toFixed(1) + "%");
+
+    function smartParse(x){
+      if (x == null || x === "") return null;
+      let s = String(x).trim();
+      const percent = s.endsWith('%');
+      s = s.replace(/,/g,'');
+      let num = Number(s.replace('%',''));
+      if (isNaN(num)) return s;
+      if (percent) num = num / 100;
+      return num;
+    }
+
+    // Helpers to interact with HF
+    function getCell(a1){
+      const sheetId = hf.getSheetId(ACTIVE_SHEET_NAME);
+      const {row,col} = a1ToRC(a1);
+      const v = hf.getCellValue({ sheet: sheetId, row, col });
+      return (v && typeof v === 'object' && 'value' in v) ? v.value : v;
+    }
+    function setCell(a1, raw){
+      const sheetId = hf.getSheetId(ACTIVE_SHEET_NAME);
+      const {row,col} = a1ToRC(a1);
+      hf.setCellContents({ sheet: sheetId, row, col }, [[ raw ]]);
+    }
+    function setCellParsed(a1, raw){
+      setCell(a1, smartParse(raw));
+    }
+    function getRangeValues(sheetName, a1start, a1end){
+      const sheetId = hf.getSheetId(sheetName);
+      const rg = rangeA1ToRC(a1start, a1end);
       const rows = [];
-      for (let r=start.row; r<=end.row; r++){
+      for (let r=rg.sRow; r<=rg.eRow; r++){
         const row = [];
-        for (let c=start.col; c<=end.col; c++){
+        for (let c=rg.sCol; c<=rg.eCol; c++){
           const val = hf.getCellValue({ sheet: sheetId, col: c, row: r });
           row.push((val && typeof val === 'object' && 'value' in val) ? val.value : val);
         }
@@ -126,44 +183,93 @@
       return rows;
     }
 
-    function renderOutput(){
-      const sheetId = hf.getSheetId(ACTIVE_SHEET_NAME);
-      const values = getRangeValues(sheetId, OUTPUT_START, OUTPUT_END);
-      box.innerHTML = buildTableHTML(values);
+    // IRR (Newton-Raphson) from U7:U27
+    function calcIRR(cashflows, guess=0.1){
+      const maxIter = 100;
+      const tol = 1e-7;
+      let r = guess;
+      for (let i=0;i<maxIter;i++){
+        let f=0, df=0;
+        for (let t=0;t<cashflows.length;t++){
+          const cf = Number(cashflows[t]) || 0;
+          const denom = Math.pow(1+r, t);
+          f += cf/denom;
+          if (denom !== 0){
+            df += -t*cf/denom/(1+r);
+          }
+        }
+        if (Math.abs(df) < 1e-12) break;
+        const rNext = r - f/df;
+        if (!isFinite(rNext)) break;
+        if (Math.abs(rNext - r) < tol) return rNext;
+        r = rNext;
+      }
+      return r;
     }
 
-    function setCell(a1, raw) {
-      const sheetId = hf.getSheetId(ACTIVE_SHEET_NAME);
-      const addr = HyperFormula.simpleCellAddressFromString(a1, sheetId);
-      const v = (raw==="" || raw===null || raw===undefined) ? null : (isNaN(Number(raw)) ? raw : Number(raw));
-      hf.setCellContents({ sheet: sheetId, row: addr.row, col: addr.col }, [[ v ]]);
+    // Build table (no letter headings). First visible row wrapped.
+    function buildTableHTML(matrix){
+      const cols = matrix[0]?.length || 0;
+      let html = '<table><colgroup>';
+      for (let c=0;c<cols;c++){ html += '<col style="width:'+ (Math.max(90, Math.floor(1200/cols))) +'px">'; }
+      html += '</colgroup><tbody>';
+      for (let r=0;r<matrix.length;r++){
+        html += '<tr>';
+        for (let c=0;c<cols;c++){
+          const v = matrix[r][c];
+          let out = "";
+          if (v==null || v==="") out = "";
+          else if (typeof v === 'number'){
+            out = fmtMoney(v);
+          } else {
+            out = v;
+          }
+          const cls = (r===0 ? 'wrap' : '');
+          html += '<td class="'+cls+'">'+out+'</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>'; 
+      return html;
     }
 
-    function getCell(a1) {
-      const sheetId = hf.getSheetId(ACTIVE_SHEET_NAME);
-      const addr = HyperFormula.simpleCellAddressFromString(a1, sheetId);
-      const val = hf.getCellValue({ sheet: sheetId, col: addr.col, row: addr.row });
-      return (val && typeof val === 'object' && 'value' in val) ? val.value : val;
+    function refreshAll(){
+      // Compute IRR from U7:U27
+      const irrVals = getRangeValues(ACTIVE_SHEET_NAME, IRR_RANGE_START, IRR_RANGE_END).map(r => r[0]);
+      const irr = calcIRR(irrVals, 0.1);
+      // Write IRR to J29
+      setCell("J29", irr);
+
+      // KPIs
+      kpiIrr.textContent = fmtPct1(irr);
+      kpiJ29.textContent = fmtPct1(Number(getCell("J29")));
+      kpiG3.textContent  = fmtPct1(Number(getCell("G3")));
+
+      // Table B7:M34
+      const table = getRangeValues(ACTIVE_SHEET_NAME, OUTPUT_START, OUTPUT_END);
+      box.innerHTML = buildTableHTML(table);
     }
 
-    function boot() {
-      hf = HyperFormula.HyperFormula.buildFromSheets(SHEETS, { licenseKey:'gpl-v3', useArrayArithmetic:true });
-
-      // Prefill inputs with current model values
-      try {
-        g2El.value = getCell('G2') ?? '';
-        g3El.value = getCell('G3') ?? '';
-        g4El.value = getCell('G4') ?? '';
-      } catch(_) {}
-
-      renderOutput();
+    function boot(){
+      buildHF();
+      g2El.value = getCell("G2") ?? "";
+      g3El.value = getCell("G3") ?? "";
+      g4El.value = getCell("G4") ?? "";
+      refreshAll();
     }
 
     applyBtn.addEventListener('click', () => {
-      setCell('G2', g2El.value);
-      setCell('G3', g3El.value);
-      setCell('G4', g4El.value);
-      renderOutput();
+      setCellParsed("G2", g2El.value);
+      setCellParsed("G3", g3El.value);
+      setCellParsed("G4", g4El.value);
+      refreshAll();
+    });
+    let timer=null;
+    [g2El,g3El,g4El].forEach(el => {
+      el.addEventListener('input', () => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => { applyBtn.click(); }, 600);
+      });
     });
 
     boot();
